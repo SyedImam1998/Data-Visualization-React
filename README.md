@@ -111,9 +111,47 @@ It may seem confusing to select elements that don't exist yet. This code is tell
 ### SVG:
 SVG stands for Scalable Vector Graphics.
 
-Here "scalable" means that, if you zoom in or out on an object, it would not appear pixelated. It scales with the display system, whether it's on a small mobile screen or a large TV monitor.
+- Here "scalable" means that, if you zoom in or out on an object, it would not appear pixelated. It scales with the display system, whether it's on a small mobile screen or a large TV monitor.
+- SVG shapes for a web page must go within an HTML svg tag.
+- CSS can be scalable when styles use relative units (such as vh, vw, or percentages), but using SVG is more flexible to build data visualizations.
 
+```html
+<svg></svg>
+```
+### Display Shapes with SVG
 
+- There are a number of supported shapes in SVG, such as rectangles and circles. They are used to display data. For example, a rectangle (<rect>) SVG shape could create a bar in a bar chart.
+- When you place a shape into the svg area, you can specify where it goes with x and y coordinates. The origin point of (0, 0) is in the upper-left corner. Positive values for x push the shape to the right, and positive values for y push the shape down from the origin point.
+- An SVG rect has four attributes. There are the x and y coordinates for where it is placed in the svg area. It also has a height and width to specify the size.
+ 
+
+### Invert SVG Elements
+
+In SVG, the origin point for the coordinates is in the upper-left corner. An x coordinate of 0 places a shape on the left edge of the SVG area. A y coordinate of 0 places a shape on the top edge of the SVG area. Higher x values push the rectangle to the right. Higher y values push the rectangle down.
+
+To make the bars right-side-up, you need to change the way the y coordinate is calculated. It needs to account for both the height of the bar and the total height of the SVG area.
+
+The height of the SVG area is 100. If you have a data point of 0 in the set, you would want the bar to start at the bottom of the SVG area (not the top). To do this, the y coordinate needs a value of 100. If the data point value were 1, you would start with a y coordinate of 100 to set the bar at the bottom. Then you need to account for the height of the bar of 1, so the final y coordinate would be 99.
+
+The y coordinate that is `  y = heightOfSVG - heightOfBar ` would place the bars right-side-up.
+
+Change the callback function for the y attribute to set the bars right-side-up. Remember that the height of the bar is 3 times the data value d.
+
+Note: In general, the relationship is `y = h - m * d`, where m is the constant that scales the data points.
+
+###  Linear Scale with D3
+- The bar and scatter plot charts both plotted data directly onto the SVG. However, if the height of a bar or one of the data points were larger than the SVG height or width values, it would go outside the SVG area.
+- In D3, there are scales to help plot data. scales are functions that tell the program how to map a set of raw data points onto the pixels of the SVG.
+- For example, say you have a 100x500-sized SVG and you want to plot Gross Domestic Product (GDP) for a number of countries. The set of numbers would be in the billion or trillion-dollar range. You provide D3 a type of scale to tell it how to place the large GDP values into that 100x500-sized area.
+- D3 has several scale types. For a linear scale (usually used with quantitative data), there is the D3 method scaleLinear():
+
+```javascript
+const scale = d3.scaleLinear()
+```
+- By default, scales use the identity relationship. This means the input value maps to the output value. However, scales can be much more flexible and interesting.
+- Say a dataset has values ranging from 50 to 480. This is the input information for a scale, also known as the domain.
+- Say a dataset has values ranging from 50 to 480. This is the input information for a scale, also known as the domain.
+- The domain() and range() methods set these values for the scale. Both methods take an array of at least two elements as an argument. Here's an example:
 ### How to prepare data:
 - Pick up a random data that is is table format.
 - Now copy the data into a Google sheet. Clean the data and remove the unnecessary fields. 
