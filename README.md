@@ -149,9 +149,79 @@ Note: In general, the relationship is `y = h - m * d`, where m is the constant t
 const scale = d3.scaleLinear()
 ```
 - By default, scales use the identity relationship. This means the input value maps to the output value. However, scales can be much more flexible and interesting.
+
+#### Domain
 - Say a dataset has values ranging from 50 to 480. This is the input information for a scale, also known as the domain.
-- Say a dataset has values ranging from 50 to 480. This is the input information for a scale, also known as the domain.
-- The domain() and range() methods set these values for the scale. Both methods take an array of at least two elements as an argument. Here's an example:
+#### Range
+
+- You want to map those points along the x axis on the SVG, between 10 units and 500 units. This is the output information, also known as the range.
+
+The domain() and range() methods set these values for the scale. Both methods take an array of at least two elements as an argument. Here's an example:
+
+### Min and Max:
+- The D3 methods domain() and range() set that information for your scale based on the data. There are a couple methods to make that easier.
+
+- Often when you set the domain, you'll want to use the minimum and maximum values within the data set. Trying to find these values manually, especially in a large data set, may cause errors.
+
+```javascript
+const exampleData = [34, 234, 73, 90, 6, 52];
+d3.min(exampleData)  // 6
+d3.max(exampleData) // 234
+```
+
+#### Nested Array:
+
+```javascript
+const locationData = [[1, 7],[6, 3],[8, 3]];
+const minX = d3.min(locationData, (d) => d[0]);
+// output 1
+```
+
+### Add Axes to a Visualization
+- Another way to improve the scatter plot is to add an x-axis and a y-axis.
+
+- D3 has two methods, axisLeft() and axisBottom(), to render the y-axis and x-axis, respectively. Here's an example to create the x-axis based on the xScale in the previous challenges:
+
+```javascript
+const xAxis = d3.axisBottom(xScale);
+```
+
+### DOMContentLoaded
+- When you want to run the certain functions only after the DOM has fully rendered.
+
+```javascript
+document.addEventListener('DOMContentLoaded', function(){})
+```
+### Get JSON with the JavaScript XMLHttpRequest Method
+
+- You can also request data from an external source. This is where APIs come into play.
+
+- Remember that APIs - or Application Programming Interfaces - are tools that computers use to communicate with one another. You'll learn how to update HTML with the data we get from APIs using a technology called AJAX.
+
+- Most web APIs transfer data in a format called JSON. JSON stands for JavaScript Object Notation.
+
+- JSON syntax looks very similar to JavaScript object literal notation. JSON has object properties and their current values, sandwiched between a { and a }.
+
+- These properties and their values are often referred to as "key-value pairs".
+
+- However, JSON transmitted by APIs are sent as bytes, and your application receives it as a string. These can be converted into JavaScript objects, but they are not JavaScript objects by default. The JSON.parse method parses the string and constructs the JavaScript object described by it.
+
+- You can request the JSON from freeCodeCamp's Cat Photo API. Here's the code you can put in your click event to do this:
+
+
+```javascript
+const req = new XMLHttpRequest();
+req.open("GET",'/json/cats.json',true);
+req.send();
+req.onload = function(){
+  const json = JSON.parse(req.responseText);
+  document.getElementsByClassName('message')[0].innerHTML = JSON.stringify(json);
+};
+```
+- Here's a review of what each piece is doing. The JavaScript XMLHttpRequest object has a number of properties and methods that are used to transfer data. 
+- First, an instance of the XMLHttpRequest object is created and saved in the req variable. Next, the open method initializes a request - this example is requesting data from an API, therefore is a GET request.
+ - The second argument for open is the URL of the API you are requesting data from. The third argument is a Boolean value where true makes it an asynchronous request. The send method sends the request. 
+ - Finally, the onload event handler parses the returned data and applies the JSON.stringify method to convert the JavaScript object into a string. This string is then inserted as the message text.
 ### How to prepare data:
 - Pick up a random data that is is table format.
 - Now copy the data into a Google sheet. Clean the data and remove the unnecessary fields. 
