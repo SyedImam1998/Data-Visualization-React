@@ -222,6 +222,9 @@ req.onload = function(){
 - First, an instance of the XMLHttpRequest object is created and saved in the req variable. Next, the open method initializes a request - this example is requesting data from an API, therefore is a GET request.
  - The second argument for open is the URL of the API you are requesting data from. The third argument is a Boolean value where true makes it an asynchronous request. The send method sends the request. 
  - Finally, the onload event handler parses the returned data and applies the JSON.stringify method to convert the JavaScript object into a string. This string is then inserted as the message text.
+
+
+
 ### How to prepare data:
 - Pick up a random data that is is table format.
 - Now copy the data into a Google sheet. Clean the data and remove the unnecessary fields. 
@@ -300,3 +303,246 @@ export default function App() {
 
 ### Difference between D3.js And Vega ?
  D3 is more suitable for developers who need fine-grained control and flexibility in creating data visualizations, while Vega is ideal for those who prefer a higher-level abstraction and want to create visualizations quickly and with less code. 
+
+### Example Of Bar Chart:
+
+#### DataSet:
+
+- Let say you are getting data like this from the url.
+https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/GDP-data.json
+
+```javascript
+"data": [
+    [
+      "1947-01-01",
+      243.1
+    ],
+    [
+      "1947-04-01",
+      246.3
+    ],
+    [
+      "1947-07-01",
+      250.1
+    ],
+    [
+      "1947-10-01",
+      260.3
+    ],
+    [
+      "1948-01-01",
+      266.2
+    ],
+    [
+      "1948-04-01",
+      272.9
+    ],
+```
+#### HTML Code:
+```html
+<html>
+  <head>
+  <style>
+    rect.bar:hover {
+      fill: black !important;
+    }
+    
+    #tooltip {
+      position: absolute;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 10px;
+      pointer-events: none;
+      opacity: 0;
+    }
+  </style>
+    
+  </head>
+  <body>
+    <div id="chart"></div>
+  <div id="tooltip"></div>
+  </body>
+</html>
+
+```
+#### JavaScript Code
+
+```javascript
+
+document.addEventListener('DOMContentLoaded', function(){
+      fetch("https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/GDP-data.json")
+      .then((response) => response.json())
+      .then((data) => {
+        const apiData = data.data;
+      
+
+        const width = 640;
+        const height = 400;
+        const marginTop = 20;
+        const marginRight = 20;
+        const marginBottom = 30;
+        const marginLeft = 40;
+
+        let xAxis = d3.scaleTime()
+          .domain([d3.min(apiData, d => new Date(d[0])), d3.max(apiData, d => new Date(d[0]))])
+          .range([marginLeft, width - marginRight]);
+
+        let y = d3.scaleLinear()
+          .domain([0, d3.max(apiData, d => d[1])])
+          .range([height - marginBottom, marginTop]);
+
+        const svg = d3.select('#chart').append("svg")
+          .attr("width", width)
+          .attr("height", height)
+          .style('border', "1px solid red").attr("id","title");
+
+        svg.selectAll('rect')
+          .data(apiData)
+          .enter()
+          .append('rect')
+          .attr('class', 'bar')
+          .attr('data-date', d => d[0])
+          .attr('data-gdp', d => d[1])
+          .attr('width', () => 25)
+          .attr('height', d => height - marginBottom - y(d[1]))
+          .attr('x', d => x(new Date(d[0])))
+          .attr('y', d => y(d[1]))
+          .style('fill', 'rgb(51, 173, 255)')
+          .on('mouseover', (event, d) => {
+            const tooltip = d3.select('#tooltip');
+            tooltip.style('opacity', 1);
+            tooltip.attr('data-date',d[0])
+            tooltip.html(`${d[0]}<br> $${ d[1]} Billion`)
+              .style('left', (event.pageX + 10) + 'px')
+              .style('top', (event.pageY - 10) + 'px');
+          })
+          .on('mouseout', () => {
+            d3.select('#tooltip').style('opacity', 0);
+          });
+
+        svg.append("g")
+          .attr("transform", `translate(0,${height - marginBottom})`)
+          .attr("id", "x-axis")
+          .call(d3.axisBottom(x).tickFormat(d3.timeFormat("%Y")));
+
+        svg.append("g")
+          .attr("id", "y-axis")
+          .attr("transform", `translate(${marginLeft},0)`)
+          .call(d3.axisLeft(y));
+      });
+    });
+```
+
+#### Decode code step by step:
+
+- This will run the function when the dom has loaded completely.
+
+```javascript
+document.addEventListener('DOMContentLoaded', function(){
+```
+- This will pull the data from the API and convert that to JSON format.
+
+```javascript
+ fetch("https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/GDP-data.json")
+      .then((response) => response.json())
+      .then((data) => {
+        const apiData = data.data;
+```
+
+- Basic Area and margin for the svg where bar chart will be shown.
+
+```javascript
+        const width = 640;
+        const height = 400;
+        const marginTop = 20;
+        const marginRight = 20;
+        const marginBottom = 30;
+        const marginLeft = 40;
+```
+- This will help us to mark the domain i.e that min data point in the dataset and max data point in dataset on X-axis.
+- And also define the range ie marking a point from left to right like from where to where a x axis line must be drawn.
+
+
+```javascript
+ let xAxis = d3.scaleTime()
+          .domain([d3.min(apiData, d => new Date(d[0])), d3.max(apiData, d => new Date(d[0]))])
+          .range([marginLeft, width - marginRight]);
+```
+
+- This will help us to mark the domain i.e that min data point in the dataset and max data point in dataset on Y-axis.
+- And also define the range ie marking a point from bottom to top like from where to where a Y-axis line must be drawn.
+
+```javascript
+let yAxis = d3.scaleLinear()
+          .domain([0, d3.max(apiData, d => d[1])])
+          .range([height - marginBottom, marginTop]);
+```
+
+- This is how you create SVG area using D3.
+```javascript
+const svg = d3.select('#chart').append("svg")
+          .attr("width", width)
+          .attr("height", height)
+          .style('border', "1px solid red").attr("id","title");
+```
+
+- Positioning the X-axis where to place.
+
+```javascript
+svg.append("g")
+          .attr("transform", `translate(0,${height - marginBottom})`)
+          .attr("id", "x-axis")
+          .call(d3.axisBottom(xAxis).tickFormat(d3.timeFormat("%Y")));
+```
+
+- Positioning the Y-axis where to place.
+```javascript
+svg.append("g")
+          .attr("id", "y-axis")
+          .attr("transform", `translate(${marginLeft},0)`)
+          .call(d3.axisLeft(yAxis));
+      });
+```
+- This will create the rect as per the items in array with the default width and height calculated as per the data points.
+- In D3.js, the scaleLinear() function creates a linear scale, which means it maps input values to output values in a linear (straight-line) manner.
+
+- When you call y(d[1]), you're essentially passing the GDP value of the current data point (d[1]) to the linear scale y. The linear scale then returns the corresponding scaled value for the height of the rectangle.
+
+- So, in simpler terms:
+
+- y(d[1]) gives you the scaled height for the rectangle based on the GDP value.
+Subtracting this scaled height from the total height of the SVG (height) and the bottom margin (marginBottom) gives you the actual height of the rectangle above the bottom of the SVG, ensuring it's positioned correctly along the y-axis.
+
+```javascript
+svg.selectAll('rect')
+          .data(apiData)
+          .enter()
+          .append('rect')
+          .attr('class', 'bar')
+          .attr('data-date', d => d[0])
+          .attr('data-gdp', d => d[1])
+          .attr('width', () => 25)
+          .attr('height', d => height - marginBottom - yAxis(d[1]))
+          .attr('x', d => xAxis(new Date(d[0])))
+          .attr('y', d => yAxis(d[1]))
+          .style('fill', 'rgb(51, 173, 255)')
+```
+
+#### Hover Effect
+
+```javascript
+.on('mouseover', (event, d) => {
+            const tooltip = d3.select('#tooltip');
+            tooltip.style('opacity', 1);
+            tooltip.attr('data-date',d[0])
+            tooltip.html(`${d[0]}<br> $${ d[1]} Billion`)
+              .style('left', (event.pageX + 10) + 'px')
+              .style('top', (event.pageY - 10) + 'px');
+          })
+          .on('mouseout', () => {
+            d3.select('#tooltip').style('opacity', 0);
+          });
+```
+
+
